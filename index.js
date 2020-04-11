@@ -152,15 +152,30 @@ function addEmployee() {
 
 
 function viewDepartments() {
-  
+  const query = "SELECT * FROM department"; 
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    askQuestions(); 
+  });
 }
 
 function viewRoles() {
-
+  const query = "SELECT * FROM role"; 
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    askQuestions(); 
+  });
 }
 
 function viewEmployees() {
-
+  const query = "SELECT * FROM employee"; 
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    askQuestions(); 
+  });
 }
 
 function updateRole() {
@@ -212,3 +227,4 @@ function getRoleID(roleName) {
 function getManagerID(managerFirst,managerLast) {
 
 }
+
