@@ -203,18 +203,17 @@ function addEmployee() {
     .then(function(answers){ 
       //need to get roleID from role name in order to add to table entry 
       let roleID = null; 
-      const query = "SELECT id FROM role WHERE ?"; 
-      connection.query(query, {title:answers.employeeRole}, function (roleErr, roleRes) {
+      const roleQuery = "SELECT id FROM role WHERE ?"; 
+      connection.query(roleQuery, {title:answers.employeeRole}, function (roleErr, roleRes) {
         if (roleErr) throw roleErr;
         roleID = roleRes[0].id; 
 
-        //TODO: manager id query and add query OR just add query 
         //if the employee has a manager, we need to query to find the manager's id
         if(answers.hasManager) {
-          //get department ID from department name provided by user so that it can be added to table entry 
+          //get manager ID from name provided by user so that it can be added to table entry 
           let managerID = null; 
-          const query = "SELECT id FROM employee WHERE ? AND ?"; 
-          connection.query(query, 
+          const managerQuery = "SELECT id FROM employee WHERE ? AND ?"; 
+          connection.query(managerQuery, 
           [
             {first_name:answers.managerFirst},
             {last_name:answers.managerLast}
@@ -225,19 +224,47 @@ function addEmployee() {
 
             console.log(managerID); 
 
-            //TODO: query to add 
+            //build query to add employee
+            const addQuery ="INSERT INTO employee SET ?"; 
+            //run query to add employee
+            connection.query(addQuery, 
+            {
+              first_name: answers.employeeFirst,
+              last_name: answers.employeeLast,
+              role_id: roleID,
+              manager_id: managerID
+            },
+            function(err,res) {
+              if(err) throw err; 
+              //show success message
+              console.log(`\n${answers.employeeFirst} ${answers.employeeLast} successfully added as an employee\n`); 
+              //run initial prompt
+              askQuestions(); 
+            }); 
           });
         }
+        //if the employee does not have a manager, just need to run the add query 
         else {
-
-          //TODO: query to add 
+          //build query to add employee
+          const addQuery ="INSERT INTO employee SET ?"; 
+          //run query to add employee
+          connection.query(addQuery, 
+          {
+            first_name: answers.employeeFirst,
+            last_name: answers.employeeLast,
+            role_id: roleID,
+          },
+          function(err,res) {
+            if(err) throw err; 
+            //show success message
+            console.log(`\n${answers.employeeFirst} ${answers.employeeLast} successfully added as an employee\n`); 
+            //run initial prompt
+            askQuestions(); 
+          });
         }
       });
-  
-      
-    })
+    });
   });
-  
 }
 
 //shows table of all department data 
@@ -279,29 +306,71 @@ function viewEmployees() {
   });
 }
 
+//updates the role of an employee 
 function updateRole() {
-  inquirer.prompt([
-    {
-      type:"input",
-      message:"Enter the first name of the employee:",
-      name:"employeeFirst"
-    },
-    {
-      type:"input",
-      message:"Enter the last name of the employee:",
-      name:"employeeLast"
-    },
-    {
-      type:"list",
-      choices:getRoleNames(), 
-      message:"Select the employee's new role:",
-      name:"employeeRole"
+  //first need to get the role names in order to execute inquirer prompt 
+  let roleNames = []; 
+  const query = "SELECT title FROM role"; 
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    for(let i = 0; i < res.length; i++) {
+      roleNames .push(res[i].title); 
     }
-  ])
-  .then(function(answers){ 
-    
-  })
+ 
+    //now prompt user for employee information 
+    inquirer.prompt([
+      {
+        type:"input",
+        message:"Enter the first name of the employee:",
+        name:"employeeFirst"
+      },
+      {
+        type:"input",
+        message:"Enter the last name of the employee:",
+        name:"employeeLast"
+      },
+      {
+        type:"list",
+        choices:roleNames, 
+        message:"Select the employee's new role:",
+        name:"employeeRole"
+      }
+    ])
+    .then(function(answers){ 
+      //need to get roleID from role name in order to add to table entry 
+      let newRoleID = null; 
+      //build query 
+      const roleQuery = "SELECT id FROM role WHERE ?"; 
+      //run query 
+      connection.query(roleQuery, {title:answers.employeeRole}, function (roleErr, roleRes) {
+        if (roleErr) throw roleErr;
+        newRoleID = roleRes[0].id; 
 
+        //build query to update role 
+        const query = "UPDATE employee SET ? WHERE ? AND ?"
+        //run query 
+        connection.query(query,
+        [
+          {
+            role_id:newRoleID
+          },
+          {
+            first_name: answers.employeeFirst
+          },
+          {
+            last_name: answers.employeeLast 
+          }
+        ],
+        function(err, res) {
+          if (err) throw err;
+          //show success message 
+          console.log(`\n${answers.employeeFirst} ${answers.employeeLast}'s role has been updated to ${answers.employeeRole}\n`); 
+          //run initial prompts 
+          askQuestions(); 
+        });
+      }); 
+    }); 
+  }); 
 }
 
 
