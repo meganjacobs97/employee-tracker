@@ -89,7 +89,7 @@ function addDepartment() {
   })
 }
 
-//TODO
+//adds a role to the role table 
 function addRole() {
   //first need to get the department names in order to execute inquirer prompt 
   let departmentNames = []; 
@@ -122,19 +122,33 @@ function addRole() {
 
       //get department ID from department name provided by user so that it can be added to table entry 
       let departmentID = null; 
-      const query = "SELECT id FROM department WHERE ?"; 
-      connection.query(query, {name:answers.roleDepartment}, function (idErr, idRes) {
+      const idQuery = "SELECT id FROM department WHERE ?"; 
+      connection.query(idQuery, {name:answers.roleDepartment}, function (idErr, idRes) {
         if (idErr) throw idErr;
         departmentID = idRes[0].id; 
 
-
-        //TODO: query to add 
+        //build query 
+        const addQuery ="INSERT INTO role SET ?"; 
+        //run query to add role
+        connection.query(addQuery, 
+        {
+          title: answers.roleTitle,
+          salary: answers.roleSalary,
+          department_id: departmentID
+        },
+        function(err,res) {
+          if(err) throw err; 
+          //show success message
+          console.log(`\n${answers.roleTitle} Role successfully added\n`); 
+          //run initial prompt
+          askQuestions(); 
+        }); 
       });
-    }) 
+    }); 
   });
 }
 
-//TODO
+
 function addEmployee() {
   //first need to get the role names in order to execute inquirer prompt 
   let roleNames = []; 
