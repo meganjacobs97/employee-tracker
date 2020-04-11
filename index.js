@@ -1,6 +1,8 @@
+//dependencies 
 const mysql = require("mysql");
 const inquirer = require("inquirer"); 
 
+//set up connection to databae 
 const connection = mysql.createConnection({
   host: "localhost",
 
@@ -15,13 +17,16 @@ const connection = mysql.createConnection({
   database: "company_db"
 });
 
+//connect to database 
 connection.connect(function(err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
   askQuestions(); 
 });
 
+//ask user what they want to do 
 function askQuestions() {
+  //CURRENT FUNCTIONALITY:
   //Add departments, roles, employees
   //View departments, roles, employees 
   //Update employee roles
@@ -34,6 +39,7 @@ function askQuestions() {
     }
   ])
   .then(function(answers){
+    //call functions based on user choice 
     switch (answers.userChoice) {
       case "Add a department":
         addDepartment(); 
