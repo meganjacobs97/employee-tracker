@@ -66,8 +66,9 @@ function askQuestions() {
   });  
 } 
 
-//TODO
+//adds a department to the department table 
 function addDepartment() {
+  //prompt for department name
   inquirer.prompt([
     {
       type:"input",
@@ -76,7 +77,15 @@ function addDepartment() {
     }
   ])
   .then(function(answers){ 
-    
+    const query ="INSERT INTO department SET ?"; 
+    //run query to add department 
+    connection.query(query, {name: answers.departmentName},function(err,res) {
+      if(err) throw err; 
+      //show success message
+      console.log(`\n${answers.departmentName} Department successfully added\n`); 
+      //run initial prompt
+      askQuestions(); 
+    }); 
   })
 }
 
