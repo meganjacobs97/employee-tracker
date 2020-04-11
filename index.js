@@ -205,11 +205,25 @@ function updateRole() {
 
 //returns array of department names 
 function getDepartmentNames() {
-
+  const query = "SELECT name FROM department"; 
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    const arr = []; 
+    for(let i = 0; i < res.length; i++) {
+      arr.push(res[i].name); 
+    }
+    return arr; 
+  });
 }
 
 //takes in a department name and returns the id of that department 
 function getDepartmentID(departmentName) {
+  const query = "SELECT id FROM department WHERE ?"; 
+  connection.query(query, {name:departmentName}, function (err, res) {
+    if (err) throw err;
+    console.log(res[0].id); 
+    return res[0].id; 
+  });
 
 }
 
